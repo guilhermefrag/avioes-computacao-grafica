@@ -15,13 +15,15 @@ export default function Radar() {
     const gridSize = 50;
     const halfCanvas = canvasSize / 2;
     const gridColor = "#e5e7eb"; // Cor da grade (cinza claro)
+
+    // Definindo posições e ângulos dos aviões
     const planePositions = [
-      { x: 75, y: 75 },
-      { x: 125, y: 100 },
-      { x: 150, y: 200 },
-      { x: 200, y: 150 },
-      { x: 250, y: 250 },
-    ]; // Posições dos aviões
+      { x: 75, y: 75, angle: 45 },
+      { x: 125, y: 100, angle: 90 },
+      { x: 150, y: 200, angle: 135 },
+      { x: 200, y: 150, angle: 180 },
+      { x: 250, y: 250, angle: 225 },
+    ];
 
     // Limpa o canvas antes de desenhar
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -71,19 +73,28 @@ export default function Radar() {
     ctx.font = "12px Arial";
     ctx.fillText("0", halfCanvas - 15, halfCanvas + 5);
 
-    // Função para desenhar um avião
-    const drawPlane = (x: number, y: number) => {
+    // Função para desenhar um avião com rotação
+    const drawPlane = (x: number, y: number, angle: number) => {
+      ctx.save(); // Salva o estado atual do contexto
+
+      // Translada para a posição do avião e rotaciona
+      ctx.translate(x, y);
+      ctx.rotate((angle * Math.PI) / 180);
+
+      // Desenha o avião rotacionado
       ctx.fillStyle = "black";
       ctx.beginPath();
-      ctx.moveTo(x, y - 10);
-      ctx.lineTo(x - 5, y + 5);
-      ctx.lineTo(x + 5, y + 5);
+      ctx.moveTo(0, -10); // Ponta do avião
+      ctx.lineTo(-5, 5);  // Asa esquerda
+      ctx.lineTo(5, 5);   // Asa direita
       ctx.closePath();
       ctx.fill();
+
+      ctx.restore(); // Restaura o estado original do contexto
     };
 
-    // Desenhar os aviões nas posições especificadas
-    planePositions.forEach(pos => drawPlane(pos.x, pos.y));
+    // Desenhar os aviões nas posições e ângulos especificados
+    planePositions.forEach(pos => drawPlane(pos.x, pos.y, pos.angle));
   }, []);
 
   return (
