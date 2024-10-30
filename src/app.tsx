@@ -1,7 +1,7 @@
-import Radar from './pages/radar/radar';
+import { Layout } from './pages/layout/layout';
 
 export function App() {
   return (
-    <Radar />
+    <Layout />
   );
 }
