@@ -3,6 +3,7 @@ import { Aviao } from '../config/avioes-config';
 export class AvioesService {
 
   static adicionarAvioes(
+    id: string,
     x: number | null,
     y: number | null,
     raio: number | null,
@@ -13,7 +14,7 @@ export class AvioesService {
       
       if(!x && !y && !raio && !angulo) return;
 
-      setAvioes((avioes) => [...avioes, { x, y, raio, angulo, velocidade, direcao }]);
+      setAvioes((avioes) => [...avioes, { id, x, y, raio, angulo, velocidade, direcao }]);
   }
 
   static polarParaCartesiano(raio: number, angulo: number): { x: number, y: number } {

@@ -14,7 +14,7 @@ import { Button } from '../ui/button';
 interface DataGridProps {
   avioes: Aviao[];
   deleteAviao: (id: string) => void;
-  addAviaoSelecionado: (aviao: Aviao) => void;
+  addAviaoSelecionado: (id: Aviao) => void;
   removeAviaoSelecionado: (id: string) => void;
 }
 

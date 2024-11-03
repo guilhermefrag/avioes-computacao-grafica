@@ -80,6 +80,7 @@ export function AdicionarNovoAviaoForm({
   }
 
   return(
+    <div className='border-2 border-black' >
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className='flex flex-col gap-2'>
         <div>
@@ -138,6 +139,7 @@ export function AdicionarNovoAviaoForm({
 
       </div>
     </form>
+    </div>
   )
   
 }
