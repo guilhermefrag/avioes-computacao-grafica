@@ -1,4 +1,5 @@
 export type Aviao = {
+  id: string
   x: number | null
   y: number | null
   raio: number | null

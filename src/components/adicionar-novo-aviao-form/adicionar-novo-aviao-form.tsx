@@ -1,12 +1,24 @@
 import { Aviao } from '@/services/avioes/config/avioes-config';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from "zod";
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { AvioesService } from '@/services/avioes/avioes-service/avioes-service';
+import {v4 as uuidv4} from 'uuid';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import { useToast } from "@/hooks/use-toast"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createAviaoSchema = z.object({
+  tipoDeMedida: z.string(),
   x: z.number(),
   y: z.number(),
   raio: z.number(),
@@ -24,13 +36,24 @@ interface AdicionarNovoAviaoFormProps {
 export function AdicionarNovoAviaoForm({
   setAvioes
 }: AdicionarNovoAviaoFormProps){
+  const { toast } = useToast()
 
-  const { handleSubmit, register } = useForm<CreateAviao>();
+  const { handleSubmit, register, control, watch } = useForm<CreateAviao>({
+    defaultValues: {
+      tipoDeMedida: 'cartesiano'
+    }
+  });
+  const watchTipoDeMedida = watch("tipoDeMedida");
 
   const onSubmit = (data: CreateAviao) => {
       const { x, y, raio, angulo, direcao, velocidade } = data;
       let [newX, newY] = [x, y];
       let [newRaio, newAngulo] = [raio, angulo];
+
+      if((!x && !y) && (!raio && !angulo)) {
+        toast({description: "Preencha algum tipo de coordenada, a velocidade e a direção", variant: 'destructive'})
+        return;
+      }
 
       if ((!x && !y) && (raio && angulo)) {
         const data = AvioesService.polarParaCartesiano(raio, angulo);
@@ -45,35 +68,59 @@ export function AdicionarNovoAviaoForm({
       }
 
       setAvioes({
-        x: x ? Number(x) : Number(newX),
-        y: y ? Number(y) : Number(newY),
-        raio: raio ? Number(raio) : Number(newRaio),
-        angulo: angulo ? Number(angulo) : Number(newAngulo),
-        direcao: Number(direcao),
-        velocidade: Number(velocidade)
-      });
+        id: uuidv4(),
+        x: parseFloat(x ? Number(x).toFixed(2) : Number(newX).toFixed(2)),
+        y: parseFloat(y ? Number(y).toFixed(2) : Number(newY).toFixed(2)),
+        raio: parseFloat(raio ? Number(raio).toFixed(2) : Number(newRaio).toFixed(2)),
+        angulo: parseFloat(angulo ? Number(angulo).toFixed(2) : Number(newAngulo).toFixed(2)),
+        direcao: parseFloat(Number(direcao).toFixed(2)),
+        velocidade: parseFloat(Number(velocidade).toFixed(2))
+    });
+    toast({description: "Avião adicionado com sucesso", variant: 'default'})
   }
 
   return(
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className='flex flex-col w-[25%] gap-2'>
+      <div className='flex flex-col gap-2'>
+        <div>
+          <Controller 
+            control={control}
+            name='tipoDeMedida'
+            render={({field}) => (
+              <Select 
+                defaultValue={field.value}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo de medida" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="cartesiano">Cartesiano</SelectItem>
+                    <SelectItem value="polar">Polar</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
         <div className='flex flex-row gap-4'>
           <div>
-            <Input placeholder='X' {...register("x")} />
+            <Input placeholder='X' {...register("x")} disabled={(watchTipoDeMedida === 'polar')} />
           </div>
           
           <div>
-            <Input placeholder='Y' {...register("y")} />
+            <Input placeholder='Y' {...register("y")} disabled={watchTipoDeMedida === 'polar'}/>
           </div>
         </div>
 
         <div className='flex flex-row gap-4'>
           <div>
-            <Input placeholder='Raio' {...register("raio")} />
+            <Input placeholder='Raio' {...register("raio")} disabled={watchTipoDeMedida === 'cartesiano'} />
           </div>
           
           <div>
-            <Input placeholder='Angulo' {...register("angulo")} />
+            <Input placeholder='Angulo' {...register("angulo")} disabled={watchTipoDeMedida === 'cartesiano'} />
           </div>
         </div>
         
