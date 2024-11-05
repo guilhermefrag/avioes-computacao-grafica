@@ -1,7 +1,10 @@
 import { AdicionarNovoAviaoForm } from '@/components/adicionar-novo-aviao-form/adicionar-novo-aviao-form';
 import { DataGrid } from '@/components/data-grid/data-grid';
+import { DistanciaAeroporto } from '@/components/distancia-aeroporto/distancia-aeroporto';
+import { DistanciaEntreAvioes } from '@/components/distancia-entre-avioes/distancia-entre-avioes';
 import { Escalonar } from '@/components/escalonar/escalonar';
 import Radar from '@/components/radar/radar';
+import { Relatorio } from '@/components/relatorio/relatorio';
 import { Rotacionar } from '@/components/rotacionar/rotacionar';
 import { Transladar } from '@/components/transladar/transladar';
 import { AvioesService } from '@/services/avioes/avioes-service/avioes-service';
@@ -12,6 +15,7 @@ export function Layout() {
 
   const [avioes, setAvioes] = useState<Aviao[]>([]);
   const [avioesSelecionados, setAvioesSelecionados] = useState<Aviao[]>([]);
+  const [mensagensRelatorio, setMensagensRelatorio] = useState<string[]>([]);
 
   const liftStateAvioes = (aviao: Aviao) => {
     setAvioes((prevState) => {
@@ -41,6 +45,16 @@ export function Layout() {
     setAvioesSelecionados((prevState) => {
       return prevState.filter(aviao => aviao.id !== id)
     })
+  }
+
+  const addMensagemRelatorio = (mensagem: string) => {
+    setMensagensRelatorio((prevState) => {
+      return [...prevState, mensagem]
+    })
+  }
+
+  const removeAllMensagensRelatorio = () => {
+    setMensagensRelatorio([])
   }
 
   const transladarAvioes = (id: string, x: number, y: number) => {
@@ -111,6 +125,34 @@ export function Layout() {
       })
     })
   }
+
+  const distanciaParaAeroporto = (distancia: number) => {
+    const avioesProximos = AvioesService.avioesProximosAeroporto(avioes, distancia);
+
+    if(avioesProximos.length === 0){
+      addMensagemRelatorio('Nenhum avião próximo ao aeroporto');
+      return;
+    }
+
+    addMensagemRelatorio('Aviões próximos ao aeroporto:');
+    avioesProximos.forEach((aviao) => {
+      addMensagemRelatorio(`Avião ${aviao.id} - Distância: ${aviao.raio}`);
+    })
+  }
+
+  const distanciaEntreAvioes = (distancia: number) => {
+    const avioesProximos = AvioesService.distanciaEntreAvioes(avioes, distancia);
+
+    if(avioesProximos.length === 0){
+      addMensagemRelatorio('Nenhum avião próximo ao aeroporto');
+      return;
+    }
+
+    addMensagemRelatorio('Aviões próximos ao aeroporto:');
+    avioesProximos.forEach((aviao) => {
+      addMensagemRelatorio(`Avião ${aviao.aviaoOrigem.id} e Avião ${aviao.aviaoComparado.id} - Distância: ${aviao.distanciaEntreAvioes}`);
+    })
+  }
     
   return (
     <div>
@@ -119,26 +161,43 @@ export function Layout() {
           setAvioes={liftStateAvioes}
         />
 
-        <DataGrid
-          avioes={avioes}
-          deleteAviao={deleteAvioes}
-          addAviaoSelecionado={addAviaoSelecionado}
-          removeAviaoSelecionado={removeAviaoSelecionado}
-        />
+        <div>
+          <DataGrid
+            avioes={avioes}
+            deleteAviao={deleteAvioes}
+            addAviaoSelecionado={addAviaoSelecionado}
+            removeAviaoSelecionado={removeAviaoSelecionado}
+          />
+
+          <Relatorio 
+            mensagensRelatorio={mensagensRelatorio}
+            removeAllMensagensRelatorio={removeAllMensagensRelatorio}
+          />
+        </div>
       </div>
-      <div className='pt-5'>
+      <div className='pt-5 flex'>
         
         <Transladar
           avioesSelecionados={avioesSelecionados}
           transladarAvioes={transladarAvioes}
         />
+
         <Escalonar
           avioesSelecionados={avioesSelecionados}
           escalonarAvioes={escalonarAvioes} 
         />
+
         <Rotacionar
           avioesSelecionados={avioesSelecionados}
           rotacionarAvioes={rotacionarAvioes}
+        />
+
+        <DistanciaAeroporto
+          distanciaParaAeroporto={distanciaParaAeroporto}
+        />
+
+        <DistanciaEntreAvioes
+          distanciaEntreAvioes={distanciaEntreAvioes}
         />
 
       </div>
