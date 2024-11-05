@@ -11,6 +11,10 @@ import { Aviao } from '@/services/avioes/config/avioes-config';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
+import { Input } from '../ui/input';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { Search } from 'lucide-react';
 
 interface DataGridProps {
   avioes: Aviao[];
@@ -19,6 +23,13 @@ interface DataGridProps {
   removeAviaoSelecionado: (id: string) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const filtraAvioesPorIds = z.object({
+  id: z.string()
+})
+
+export type FiltraAvioesPorIds = z.infer<typeof filtraAvioesPorIds>;
+
 export function DataGrid({
   avioes,
   deleteAviao,
@@ -26,6 +37,15 @@ export function DataGrid({
   removeAviaoSelecionado,
 }: DataGridProps) {
   const [selectedAvioes, setSelectedAvioes] = useState<Set<string>>(new Set());
+  const [filterId, setFilterId] = useState<string>("");
+
+  const { handleSubmit, register } = useForm<FiltraAvioesPorIds>()
+
+  const onSubmit = (data: FiltraAvioesPorIds) => {
+    const { id } = data;
+
+    setFilterId(id);
+  }
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -50,48 +70,67 @@ export function DataGrid({
     setSelectedAvioes(newSelectedAvioes);
   };
 
+  const filteredAvioes = avioes.filter((aviao) => {
+    const filterIds = filterId
+      .split(',')
+      .map(id => id.trim().toLowerCase())
+      .filter(id => id !== "");
+
+    return filterIds.length === 0 || filterIds.includes(aviao.id.toLowerCase());
+  });
+
   return (
-    <ScrollArea className="h-[200px] w-full border-2 border-black p-4 mb-2">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <Checkbox
-                onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
-              />
-            </TableHead>
-            <TableHead>Id</TableHead>
-            <TableHead>X</TableHead>
-            <TableHead>Y</TableHead>
-            <TableHead>Raio</TableHead>
-            <TableHead>Angulo(Radianos)</TableHead>
-            <TableHead>Velocidade</TableHead>
-            <TableHead>Direcao</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {avioes.map((aviao) => (
-            <TableRow key={aviao.id}>
-              <TableCell>
+    <div className='border-2 border-black'>
+      <form className="mb-4 flex" onSubmit={handleSubmit(onSubmit)}>
+        <Input placeholder="Filtrar por ID" {...register('id')} />
+        
+        <Button variant={'outline'} type='submit'>
+          <Search />
+        </Button>
+      </form>
+      <ScrollArea className="h-[200px] w-full p-4 mb-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
                 <Checkbox
-                  onCheckedChange={(checked) => handleSelectAviao(checked as boolean, aviao)}
-                  checked={selectedAvioes.has(aviao.id)}
+                  onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
                 />
-              </TableCell>
-              <TableCell>{aviao.id}</TableCell>
-              <TableCell>{aviao.x}</TableCell>
-              <TableCell>{aviao.y}</TableCell>
-              <TableCell>{aviao.raio}</TableCell>
-              <TableCell>{aviao.angulo}</TableCell>
-              <TableCell>{aviao.velocidade}</TableCell>
-              <TableCell>{aviao.direcao}</TableCell>
-              <TableCell className="text-right">
-                <Button variant={'destructive'} onClick={() => deleteAviao(aviao.id)}>Deletar</Button>
-              </TableCell>
+              </TableHead>
+              <TableHead>Id</TableHead>
+              <TableHead>X</TableHead>
+              <TableHead>Y</TableHead>
+              <TableHead>Raio</TableHead>
+              <TableHead>Angulo(Radianos)</TableHead>
+              <TableHead>Velocidade</TableHead>
+              <TableHead>Direcao</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </ScrollArea>
+          </TableHeader>
+          <TableBody>
+            {filteredAvioes.map((aviao) => (
+              <TableRow key={aviao.id}>
+                <TableCell>
+                  <Checkbox
+                    onCheckedChange={(checked) => handleSelectAviao(checked as boolean, aviao)}
+                    checked={selectedAvioes.has(aviao.id)}
+                  />
+                </TableCell>
+                <TableCell>{aviao.id}</TableCell>
+                <TableCell>{aviao.x}</TableCell>
+                <TableCell>{aviao.y}</TableCell>
+                <TableCell>{aviao.raio}</TableCell>
+                <TableCell>{aviao.angulo}</TableCell>
+                <TableCell>{aviao.velocidade}</TableCell>
+                <TableCell>{aviao.direcao}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant={'destructive'} onClick={() => deleteAviao(aviao.id)}>Deletar</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
+    </div>
   );
 }
