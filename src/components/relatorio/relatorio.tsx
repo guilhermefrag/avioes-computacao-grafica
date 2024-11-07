@@ -12,7 +12,7 @@ export function Relatorio({
 }: RelatorioProps){
 
   return(
-    <div className='flex flex-col w-full border-2 border-black'>
+    <div className='flex flex-col w-full border border-black rounded-md p-2 mt-2'>
       <div className='text-center'>
         <h1>Relatórios</h1>
       </div>

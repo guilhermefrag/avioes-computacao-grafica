@@ -7,3 +7,18 @@ export interface AvioesProximos {
   aviaoComparado: Aviao;
   distanciaEntreAvioes: number;
 }
+
+export type AvioesColisao = {
+  aviaoA: Aviao;
+  aviaoB: Aviao;
+  tempoParaColisao: number; // em segundos
+};
+
+export type ColisaoResultado = {
+  aviaoA: Aviao;
+  aviaoB: Aviao;
+  pontoColisao: { x: number; y: number };
+  tempoA: number; // em segundos
+  tempoB: number; // em segundos
+  diferencaTempo: number; // em segundos
+};

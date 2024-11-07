@@ -15,6 +15,7 @@ import { Input } from '../ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { Search } from 'lucide-react';
+import { AvioesService } from '@/services/avioes/avioes-service/avioes-service';
 
 interface DataGridProps {
   avioes: Aviao[];
@@ -80,7 +81,7 @@ export function DataGrid({
   });
 
   return (
-    <div className='border-2 border-black'>
+    <div className='border border-black rounded-md p-2'>
       <form className="mb-4 flex" onSubmit={handleSubmit(onSubmit)}>
         <Input placeholder="Filtrar por ID" {...register('id')} />
         
@@ -101,7 +102,7 @@ export function DataGrid({
               <TableHead>X</TableHead>
               <TableHead>Y</TableHead>
               <TableHead>Raio</TableHead>
-              <TableHead>Angulo(Radianos)</TableHead>
+              <TableHead>Angulo</TableHead>
               <TableHead>Velocidade</TableHead>
               <TableHead>Direcao</TableHead>
               <TableHead>Ações</TableHead>
@@ -120,7 +121,7 @@ export function DataGrid({
                 <TableCell>{aviao.x}</TableCell>
                 <TableCell>{aviao.y}</TableCell>
                 <TableCell>{aviao.raio}</TableCell>
-                <TableCell>{aviao.angulo}</TableCell>
+                <TableCell>{AvioesService.radioanosParaGraus(Number(aviao.angulo)).toFixed(0)}</TableCell>
                 <TableCell>{aviao.velocidade}</TableCell>
                 <TableCell>{aviao.direcao}</TableCell>
                 <TableCell className="text-right">

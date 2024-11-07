@@ -42,10 +42,10 @@ export function Rotacionar({
   }
 
   return (
-    <div className='flex flex-col w-full max-w-56 border-2 border-black'>
+    <div className='flex flex-col w-full border border-black rounded-md p-2 mt-2'>
       <form onSubmit={handleSubmit(onSubmit)}>
         
-        <div>
+        <div className='flex flex-col gap-2 pb-2'>
           <Input placeholder='Angulo' {...register('angulo')} />
           <Input placeholder='X' {...register('x')} />
           <Input placeholder='Y' {...register('y')} />

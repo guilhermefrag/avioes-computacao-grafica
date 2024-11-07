@@ -4,8 +4,8 @@ export type Aviao = {
   y: number | null
   raio: number | null
   angulo: number | null //em radianos
-  velocidade: number // nao defini ainda, mas estava pensando em km por hora
-  direcao: number
+  velocidade: number // em km por hora
+  direcao: number // em graus
 }
 
 export const avioesTeste = [

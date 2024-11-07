@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { AvioesService } from '@/services/avioes/avioes-service/avioes-service';
-import {v4 as uuidv4} from 'uuid';
+
 import {
   Select,
   SelectContent,
@@ -31,10 +31,14 @@ export type CreateAviao = z.infer<typeof createAviaoSchema>;
 
 interface AdicionarNovoAviaoFormProps {
   setAvioes: (aviao: Aviao) => void
+  id: string
+  setNextId: () => void
 }
 
 export function AdicionarNovoAviaoForm({
-  setAvioes
+  setAvioes,
+  id,
+  setNextId
 }: AdicionarNovoAviaoFormProps){
   const { toast } = useToast()
 
@@ -68,7 +72,7 @@ export function AdicionarNovoAviaoForm({
       }
 
       setAvioes({
-        id: uuidv4(),
+        id: id,
         x: parseFloat(x ? Number(x).toFixed(2) : Number(newX).toFixed(2)),
         y: parseFloat(y ? Number(y).toFixed(2) : Number(newY).toFixed(2)),
         raio: parseFloat(raio ? Number(raio).toFixed(2) : Number(newRaio).toFixed(2)),
@@ -76,69 +80,70 @@ export function AdicionarNovoAviaoForm({
         direcao: parseFloat(Number(direcao).toFixed(2)),
         velocidade: parseFloat(Number(velocidade).toFixed(2))
     });
+    setNextId()
     toast({description: "Avião adicionado com sucesso", variant: 'default'})
   }
 
   return(
-    <div className='border-2 border-black' >
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className='flex flex-col gap-2'>
-        <div>
-          <Controller 
-            control={control}
-            name='tipoDeMedida'
-            render={({field}) => (
-              <Select 
-                defaultValue={field.value}
-                onValueChange={field.onChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de medida" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="cartesiano">Cartesiano</SelectItem>
-                    <SelectItem value="polar">Polar</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </div>
-        <div className='flex flex-row gap-4'>
+    <div className='border border-black rounded-md p-2 w-full min-w-72' >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className='flex flex-col gap-2'>
           <div>
-            <Input placeholder='X' {...register("x")} disabled={(watchTipoDeMedida === 'polar')} />
+            <Controller 
+              control={control}
+              name='tipoDeMedida'
+              render={({field}) => (
+                <Select 
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de medida" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="cartesiano">Cartesiano</SelectItem>
+                      <SelectItem value="polar">Polar</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div className='flex flex-row gap-4'>
+            <div>
+              <Input placeholder='X' {...register("x")} disabled={(watchTipoDeMedida === 'polar')} />
+            </div>
+            
+            <div>
+              <Input placeholder='Y' {...register("y")} disabled={watchTipoDeMedida === 'polar'}/>
+            </div>
+          </div>
+
+          <div className='flex flex-row gap-4'>
+            <div>
+              <Input placeholder='Raio' {...register("raio")} disabled={watchTipoDeMedida === 'cartesiano'} />
+            </div>
+            
+            <div>
+              <Input placeholder='Angulo' {...register("angulo")} disabled={watchTipoDeMedida === 'cartesiano'} />
+            </div>
           </div>
           
-          <div>
-            <Input placeholder='Y' {...register("y")} disabled={watchTipoDeMedida === 'polar'}/>
+          <div className='flex flex-row gap-4'>
+            <div>
+              <Input placeholder='Direção' {...register("direcao")} />
+            </div>
+            
+            <div>
+              <Input placeholder='Velocidade' {...register("velocidade")} />
+            </div>
           </div>
-        </div>
 
-        <div className='flex flex-row gap-4'>
-          <div>
-            <Input placeholder='Raio' {...register("raio")} disabled={watchTipoDeMedida === 'cartesiano'} />
-          </div>
-          
-          <div>
-            <Input placeholder='Angulo' {...register("angulo")} disabled={watchTipoDeMedida === 'cartesiano'} />
-          </div>
-        </div>
-        
-        <div className='flex flex-row gap-4'>
-          <div>
-            <Input placeholder='Direção' {...register("direcao")} />
-          </div>
-          
-          <div>
-            <Input placeholder='Velocidade' {...register("velocidade")} />
-          </div>
-        </div>
+          <Button type='submit' variant={'outline'}>Adicionar</Button>
 
-        <Button type='submit' variant={'outline'}>Adicionar</Button>
-
-      </div>
-    </form>
+        </div>
+      </form>
     </div>
   )
   

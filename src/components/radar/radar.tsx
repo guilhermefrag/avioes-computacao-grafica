@@ -25,7 +25,6 @@ export default function Radar({
     canvas.width = canvasSize;
     canvas.height = canvasSize;
 
-    // Limpa e desenha o grid no canvas
     const desenhaGrade = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = gridColor;
@@ -45,7 +44,6 @@ export default function Radar({
         ctx.stroke();
       }
 
-      // Desenha o ponto central
       ctx.fillStyle = "gray";
       ctx.beginPath();
       ctx.arc(halfCanvas, halfCanvas, 5, 0, Math.PI * 2);
@@ -53,19 +51,17 @@ export default function Radar({
     };
 
     const aviaoImg = new Image();
-    aviaoImg.src = 'src/assets/aviao.png'; // Altere o caminho para o local correto da imagem
+    aviaoImg.src = 'src/assets/aviao.png';
 
     aviaoImg.onload = () => {
-      // Função para desenhar um avião com imagem invertida e rotação
       const desenhaAviao = (x: number, y: number, direcao: number) => {
         ctx.save();
         const posX = halfCanvas + x;
         const posY = halfCanvas - y;
 
         ctx.translate(posX, posY);
-        ctx.rotate((direcao * Math.PI) / -180); // Converte o ângulo para radianos
+        ctx.rotate((direcao * Math.PI) / -180);
 
-        // Ajuste de posição da imagem, centralizando o avião no ponto
         ctx.drawImage(aviaoImg, -aviaoImg.width / 2, -aviaoImg.height / 2);
 
         ctx.restore();
@@ -83,8 +79,7 @@ export default function Radar({
 
   return (
     <div className="flex flex-col items-center mt-8">
-      <h1 className="text-2xl font-semibold mb-4">Radar</h1>
-      <div className="border border-gray-700 w-[800px] h-[800px] relative">
+      <div className="border border-gray-700 w-[500px] h-[500px] relative">
         <canvas ref={canvasRef} width={800} height={800} className="w-full h-full" />
       </div>
     </div>

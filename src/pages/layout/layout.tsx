@@ -5,6 +5,8 @@ import { DistanciaEntreAvioes } from '@/components/distancia-entre-avioes/distan
 import { Escalonar } from '@/components/escalonar/escalonar';
 import Radar from '@/components/radar/radar';
 import { Relatorio } from '@/components/relatorio/relatorio';
+import { RotaDeColisao } from '@/components/rota-de-colisao/rota-de-colisao';
+import { RotacionarSimples } from '@/components/rotacionar-simples/rotacionar-simples';
 import { Rotacionar } from '@/components/rotacionar/rotacionar';
 import { Transladar } from '@/components/transladar/transladar';
 import { AvioesService } from '@/services/avioes/avioes-service/avioes-service';
@@ -16,6 +18,7 @@ export function Layout() {
   const [avioes, setAvioes] = useState<Aviao[]>([]);
   const [avioesSelecionados, setAvioesSelecionados] = useState<Aviao[]>([]);
   const [mensagensRelatorio, setMensagensRelatorio] = useState<string[]>([]);
+  const [id, setId] = useState(0);
 
   const liftStateAvioes = (aviao: Aviao) => {
     setAvioes((prevState) => {
@@ -55,6 +58,12 @@ export function Layout() {
 
   const removeAllMensagensRelatorio = () => {
     setMensagensRelatorio([])
+  }
+
+  const setNextId = () => {
+    setId((prevState) => {
+      return prevState + 1
+    })
   }
 
   const transladarAvioes = (id: string, x: number, y: number) => {
@@ -98,6 +107,21 @@ export function Layout() {
       })
     })
   }
+
+  const rotacionarSimples = (id: string, direcao: number) => {
+    setAvioes((prevState) => {
+      return prevState.map((aviao) => {
+        if (aviao.id === id) {
+          const novaDirecao = (aviao.direcao + direcao) % 360;
+          return {
+            ...aviao,
+            direcao: novaDirecao < 0 ? novaDirecao + 360 : novaDirecao,
+          };
+        }
+        return aviao;
+      });
+    });
+  };
 
   const rotacionarAvioes = (id: string, angulo: number, x: number, y: number) => {
     setAvioes((prevState) => {
@@ -153,57 +177,90 @@ export function Layout() {
       addMensagemRelatorio(`Avião ${aviao.aviaoOrigem.id} e Avião ${aviao.aviaoComparado.id} - Distância: ${aviao.distanciaEntreAvioes}`);
     })
   }
+
+  const rotasDeColisao = (tempoMinimo: number) => {
+    const avioesEmRotaDeColisao = AvioesService.avioesEmRotasDeColisao(avioes, tempoMinimo);
+
+    if(avioesEmRotaDeColisao.length === 0){
+      addMensagemRelatorio('Nenhum avião em rota de colisão');
+      return;
+    }
+
+    addMensagemRelatorio('Aviões em rota de colisão:');
+    avioesEmRotaDeColisao.forEach((colisao) => {
+      const { tempoA, tempoB, pontoColisao } = colisao;
+
+      addMensagemRelatorio(`
+        -Tempo até a colisão: 
+        Avião A: ${tempoA.toFixed(2)} segundos
+        Avião B: ${tempoB.toFixed(2)} segundos
+        
+        - Ponto de colisão: (${pontoColisao.x.toFixed(2)}, ${pontoColisao.y.toFixed(2)})
+      `);
+      return;
+    })
+  }
     
   return (
-    <div>
-      <div className='flex flex-row gap-5 w-full'>
-        <AdicionarNovoAviaoForm
+    <div className="flex flex-col w-full gap-5 p-5">
+      <div className="flex flex-row gap-5 w-full max-w-6xl">
+        <AdicionarNovoAviaoForm 
           setAvioes={liftStateAvioes}
+          id={id.toString()}
+          setNextId={setNextId}
         />
+        <div className='flex flex-col gap-2'>
+        
+          <Transladar
+            avioesSelecionados={avioesSelecionados}
+            transladarAvioes={transladarAvioes}
+          />
 
-        <div>
+          <Escalonar
+            avioesSelecionados={avioesSelecionados}
+            escalonarAvioes={escalonarAvioes}
+          />
+
+          <RotacionarSimples
+            avioesSelecionados={avioesSelecionados}
+            rotacionarSimples={rotacionarSimples}
+          />
+
+          <Rotacionar
+            avioesSelecionados={avioesSelecionados}
+            rotacionarAvioes={rotacionarAvioes}
+          />
+        
+        </div>
+
+        <div className='flex flex-col gap-2'>
+            <DistanciaAeroporto distanciaParaAeroporto={distanciaParaAeroporto} />
+    
+            <DistanciaEntreAvioes distanciaEntreAvioes={distanciaEntreAvioes} />
+
+            <RotaDeColisao 
+              rotasDeColisao={rotasDeColisao} 
+            />
+        </div>
+
+          <Radar avioes={avioes} />
+
+        <div className="flex flex-col w-full">
           <DataGrid
             avioes={avioes}
             deleteAviao={deleteAvioes}
             addAviaoSelecionado={addAviaoSelecionado}
             removeAviaoSelecionado={removeAviaoSelecionado}
           />
-
-          <Relatorio 
+  
+          <Relatorio
             mensagensRelatorio={mensagensRelatorio}
             removeAllMensagensRelatorio={removeAllMensagensRelatorio}
           />
         </div>
-      </div>
-      <div className='pt-5 flex'>
         
-        <Transladar
-          avioesSelecionados={avioesSelecionados}
-          transladarAvioes={transladarAvioes}
-        />
-
-        <Escalonar
-          avioesSelecionados={avioesSelecionados}
-          escalonarAvioes={escalonarAvioes} 
-        />
-
-        <Rotacionar
-          avioesSelecionados={avioesSelecionados}
-          rotacionarAvioes={rotacionarAvioes}
-        />
-
-        <DistanciaAeroporto
-          distanciaParaAeroporto={distanciaParaAeroporto}
-        />
-
-        <DistanciaEntreAvioes
-          distanciaEntreAvioes={distanciaEntreAvioes}
-        />
-
       </div>
-      <Radar 
-        avioes={avioes}
-      />
     </div>
   );
+  
 }
