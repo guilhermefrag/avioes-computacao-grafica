@@ -94,6 +94,12 @@ export class AvioesService {
         const anguloA = (aviaoA.direcao * Math.PI) / 180;
         const anguloB = (aviaoB.direcao * Math.PI) / 180;
   
+        const dxA = aviaoA.velocidade * Math.cos(anguloA);
+        const dyA = aviaoA.velocidade * Math.sin(anguloA);
+  
+        const dxB = aviaoB.velocidade * Math.cos(anguloB);
+        const dyB = aviaoB.velocidade * Math.sin(anguloB);
+  
         if (Math.abs(aviaoA.direcao - aviaoB.direcao) < 0.01) {
           const distancia = Math.sqrt((aviaoA.x - aviaoB.x) ** 2 + (aviaoA.y - aviaoB.y) ** 2);
           const tempoA = (distancia / aviaoA.velocidade) * 3600;
@@ -110,10 +116,10 @@ export class AvioesService {
           continue;
         }
   
-        const mA = Math.tan(anguloA);
+        const mA = dyA / dxA;
         const bA = aviaoA.y - mA * aviaoA.x;
   
-        const mB = Math.tan(anguloB);
+        const mB = dyB / dxB;
         const bB = aviaoB.y - mB * aviaoB.x;
   
         const x = (bB - bA) / (mA - mB);
@@ -125,7 +131,7 @@ export class AvioesService {
         const tempoA = (distanciaA / aviaoA.velocidade) * 3600;
         const tempoB = (distanciaB / aviaoB.velocidade) * 3600;
   
-        if (tempoA >= tempoMinimoEmSegundos && tempoB >= tempoMinimoEmSegundos) {
+        if (tempoA <= tempoMinimoEmSegundos && tempoB <= tempoMinimoEmSegundos) {
           aviõesEmColisao.push({
             aviaoA,
             aviaoB,
